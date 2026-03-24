@@ -11,9 +11,12 @@ For the full architecture overview, see [RFC 1000](rfc-1000.md).
 | RFC | Title | Status |
 |-----|-------|--------|
 | [1000](rfc-1000.md) | Protocol Suite Master Index & Architecture Overview | Stable |
+| [1001](rfc-1001.md) | **The Four Primitives** | Draft |
 | [1200](rfc-1200.md) | Delegation Trust Packet Profile | Draft |
 | [1300](rfc-1300.md) | Device Authority & OS Integration Model | Draft |
+| [1400](rfc-1400.md) | **Authorization Certificate** | Draft |
 | [2001](rfc-2001.md) | Trust Packet Format | Draft |
+| [2002](rfc-2002.md) | **Authorization Ledger** | Draft |
 | [3001](rfc-3001.md) | Verifier DNS Hardening Algorithm | Draft |
 | [3002](rfc-3002.md) | DKIM / DNS Key Discovery & Validation Profile | Draft |
 | [4001](rfc-4001.md) | Operational Compliance Checklist | Stable |

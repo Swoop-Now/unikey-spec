@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniKey — How It Works</title>
+<style>
+  :root {
+    --blue: #0077C8;
+    --green: #00C853;
+    --gold: #FFD600;
+    --bg: #0a0e1a;
+    --card: #111827;
+    --border: #1e293b;
+    --text: #e2e8f0;
+    --dim: #94a3b8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .hero {
+    text-align: center;
+    padding: 60px 40px 50px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero .tag {
+    font-size: 0.75em;
+    letter-spacing: 3px;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-size: 2.2em;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--blue), var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+  }
+  .hero p { color: var(--dim); max-width: 580px; margin: 0 auto; font-size: 1.05em; }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 50px 24px; }
+  .section-label {
+    font-size: 0.7em;
+    letter-spacing: 2px;
+    color: var(--blue);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  h2 { font-size: 1.4em; font-weight: 700; margin-bottom: 6px; }
+  .section-desc { color: var(--dim); font-size: 0.92em; margin-bottom: 32px; }
+
+  .steps { position: relative; }
+  .step {
+    display: flex;
+    gap: 24px;
+    position: relative;
+  }
+  .step-rail {
+    width: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .step-num {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.85em;
+    flex-shrink: 0; z-index: 2;
+  }
+  .step-num.blue { background: rgba(0,119,200,0.2); color: var(--blue); border: 2px solid var(--blue); }
+  .step-num.green { background: rgba(0,200,83,0.15); color: var(--green); border: 2px solid var(--green); }
+  .step-num.gold { background: rgba(255,214,0,0.12); color: var(--gold); border: 2px solid var(--gold); }
+  .step-line {
+    width: 2px; flex: 1;
+    background: var(--border);
+    min-height: 16px;
+  }
+  .step-body { flex: 1; padding-bottom: 36px; }
+  .step-body h3 { font-size: 1.05em; font-weight: 600; margin-bottom: 6px; }
+  .step-body .who {
+    font-size: 0.78em; color: var(--dim);
+    margin-bottom: 10px; font-style: italic;
+  }
+  .step-body p { color: var(--dim); font-size: 0.9em; margin-bottom: 12px; }
+
+  .packet {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 12px;
+    overflow-x: auto;
+  }
+  .packet-label {
+    font-size: 0.68em; letter-spacing: 1.5px;
+    color: var(--green); text-transform: uppercase;
+    margin-bottom: 10px; font-weight: 600;
+  }
+  .packet pre {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.78em; line-height: 1.65;
+  }
+  .k { color: #7dd3fc; }
+  .s { color: #86efac; }
+  .n { color: #fbbf24; }
+  .c { color: #64748b; font-style: italic; }
+
+  .callout {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-top: 12px;
+  }
+  .callout.why { border-left: 3px solid var(--blue); }
+  .callout.security { border-left: 3px solid var(--green); }
+  .callout.scope { border-left: 3px solid var(--gold); }
+  .callout h4 { font-size: 0.82em; font-weight: 700; margin-bottom: 6px; }
+  .callout h4.blue { color: var(--blue); }
+  .callout h4.green { color: var(--green); }
+  .callout h4.gold { color: var(--gold); }
+  .callout p, .callout li { font-size: 0.85em; color: var(--dim); }
+  .callout ul { padding-left: 18px; margin-top: 4px; }
+  .callout li { margin-bottom: 3px; }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 50px 0; }
+
+  .arrow-down {
+    text-align: center; color: var(--dim);
+    font-size: 0.78em; padding: 4px 0 8px;
+  }
+
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .cta-link {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, var(--blue), var(--green));
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.92em;
+    transition: opacity 0.2s;
+  }
+  .cta-link:hover { opacity: 0.85; }
+
+  .footer {
+    text-align: center; padding: 40px;
+    font-size: 0.72em; color: var(--dim);
+    border-top: 1px solid var(--border);
+  }
+  .footer a { color: var(--blue); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 1.5em; }
+    .compare { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="tag">UniKey Protocol</div>
+  <h1>Buying Sneakers with UniKey</h1>
+  <p>What happens when you tap "Buy Now" on a pair of Jordan 4s — and your phone proves you authorized the purchase without sharing a password, card number, or token.</p>
+</div>
+
+<div class="container">
+
+  <div class="section-label">The Scenario</div>
+  <h2>You're buying $189 sneakers on a shopping app</h2>
+  <p class="section-desc">You found the pair you want, you tap "Buy Now," and your phone handles the rest. No password. No card number sent over the wire. Your phone's secure chip signs a cryptographic proof that <em>you</em> approved <em>this exact purchase</em> — and that proof travels through the store and their payment processor before coming back to your phone for final confirmation.</p>
+
+  <hr class="divider">
+
+  <div class="section-label">The Flow</div>
+  <h2>Step by step — what happens after you tap "Buy Now"</h2>
+  <p class="section-desc"></p>
+
+  <div class="steps">
+
+    <!-- Step 1 -->
+    <div class="step">
+      <div class="step-rail">
+        <div class="step-num blue">1</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-body">
+        <h3>You tap "Buy Now" on the app</h3>
+        <div class="who">Your Phone &rarr; Store App</div>
+        <p>You're looking at Jordan 4 Retro, size 11, $189. You tap Buy. The app doesn't ask for a password or card number — it asks your phone to prove you're you.</p>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="step">
+      <div class="step-rail">
+        <div class="step-num blue">2</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-body">
+        <h3>Your phone asks for Face ID</h3>
+        <div class="who">Your Phone (Secure Enclave)</div>
+        <p>Your phone shows you the details: <em>"Pay $189.00 to SoleSupply for Jordan 4 Retro?"</em> You confirm with Face ID. Your phone's secure chip — the same hardware that protects Apple Pay — creates a Trust Packet.</p>
+
+        <div class="callout why">
+          <h4 class="blue">What's a Trust Packet?</h4>
+          <p>Think of it as a digital notarized receipt that says: "This person, on this device, approved this exact purchase, at this exact time, for this exact store." It's signed by hardware that can't be copied or faked remotely.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="step">
+      <div class="step-rail">
+        <div class="step-num green">3</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-body">
+        <h3>Your phone creates the Trust Packet</h3>
+        <div class="who">Your Phone &rarr; Store</div>
+        <p>The secure chip builds and signs the packet. This is what it looks like under the hood:</p>
+
+        <div class="packet">
+          <div class="packet-label">Trust Packet &mdash; Your Purchase Authorization</div>
+<pre>{
+  <span class="k">"claims"</span>: {
+    <span class="k">"audience"</span>:   <span class="s">"solesupply.com"</span>,
+    <span class="k">"issuer"</span>:     <span class="s">"device:iphone-15-pro"</span>,
+    <span class="k">"scope"</span>:      [<span class="s">"pay"</span>],
+    <span class="k">"subject"</span>:    <span class="s">"user@icloud.com"</span>
+  },
+  <span class="k">"header"</span>: {
+    <span class="k">"expires_at"</span>: <span class="s">"2026-03-16T12:05:00Z"</span>,   <span class="c">// good for 5 minutes</span>
+    <span class="k">"issued_at"</span>:  <span class="s">"2026-03-16T12:00:00Z"</span>,
+    <span class="k">"nonce"</span>:      <span class="s">"a7f3c9e1-4b2d-4f8a-9c6e-3d5b7a2e1f09"</span>,
+    <span class="k">"packet_id"</span>:  <span class="s">"c47e2d91-8a3f-4e5b-b7c1-9d6f0e4a2b83"</span>,
+    <span class="k">"tp_version"</span>: <span class="s">"1.0"</span>
+  },
+  <span class="k">"payload"</span>: {
+    <span class="k">"amount"</span>:   <span class="s">"189.00"</span>,
+    <span class="k">"currency"</span>: <span class="s">"USD"</span>,
+    <span class="k">"item"</span>:     <span class="s">"Jordan 4 Retro - Size 11"</span>,
+    <span class="k">"order_id"</span>: <span class="s">"SS-20260316-7829"</span>
+  },
+  <span class="k">"signatures"</span>: [{
+    <span class="k">"algorithm"</span>: <span class="s">"ed25519"</span>,
+    <span class="k">"key_id"</span>:    <span class="s">"2026q1-user"</span>,
+    <span class="k">"signature"</span>: <span class="s">"MEQCIG3k8xYw...7Hd2sF4Q"</span>,
+    <span class="k">"signer"</span>:    <span class="s">"user@icloud.com"</span>
+  }]
+}</pre>
+        </div>
+
+        <div class="callout scope" style="margin-top: 16px;">
+          <h4 class="gold">What each field means</h4>
+          <ul>
+            <li><strong>audience</strong> — This payment is only valid at SoleSupply. Intercept it, send it to another store? Rejected.</li>
+            <li><strong>scope: "pay"</strong> — This packet only authorizes a payment. Nothing else.</li>
+            <li><strong>payload</strong> — The exact amount, item, and order. Change a single character and the signature breaks.</li>
+            <li><strong>expires_at</strong> — 5 minutes. After that, it's dead.</li>
+            <li><strong>nonce</strong> — One-time use. Can never be replayed.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4 -->
+    <div class="step">
+      <div class="step-rail">
+        <div class="step-num blue">4</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-body">
+        <h3>SoleSupply verifies your packet and co-signs it</h3>
+        <div class="who">Store (UniKey Verifier + Signer)</div>
+        <p>SoleSupply doesn't just blindly forward your request. They verify your Trust Packet first — checking your signature, the amount, and the time window. Once they confirm it's legitimate, they create their own delegation packet that says: <em>"We, SoleSupply, have verified this customer's authorization and are now delegating payment processing to Stripe."</em></p>
+        <p>They sign this delegation with their own key, and it cryptographically references your original packet. The store never sees a card number because there isn't one — the Trust Packet <em>is</em> the authorization.</p>
+
+        <div class="callout why">
+          <h4 class="blue">What SoleSupply verified</h4>
+          <ul>
+            <li>Is the user's signature valid? (look up public key via DNS)</li>
+            <li>Is the audience correct? (packet is addressed to <code>solesupply.com</code> — yes)</li>
+            <li>Is it still within the time window? (not expired)</li>
+            <li>Does the order match? ($189, Jordan 4 Retro, order SS-20260316-7829)</li>
+          </ul>
+        </div>
+
+        <div class="packet" style="margin-top: 16px;">
+          <div class="packet-label">SoleSupply's Delegation Packet to Stripe</div>
+<pre>{
+  <span class="k">"claims"</span>: {
+    <span class="k">"delegated_to"</span>: <span class="s">"stripe.com"</span>,
+    <span class="k">"issuer"</span>:       <span class="s">"solesupply.com"</span>,
+    <span class="k">"parent_tph"</span>:   <span class="s">"sha256:a1b2c3d4..."</span>,  <span class="c">// links back to YOUR packet</span>
+    <span class="k">"scope"</span>:        [<span class="s">"pay:max_189"</span>],
+    <span class="k">"subject"</span>:      <span class="s">"order:SS-20260316-7829"</span>,
+    <span class="k">"constraints"</span>: {
+      <span class="k">"amount_max"</span>: <span class="n">189.00</span>,
+      <span class="k">"currency"</span>:   <span class="s">"USD"</span>,
+      <span class="k">"merchant"</span>:   <span class="s">"solesupply.com"</span>
+    }
+  },
+  <span class="k">"header"</span>: {
+    <span class="k">"expires_at"</span>: <span class="s">"2026-03-16T12:03:00Z"</span>,   <span class="c">// even shorter — 3 min</span>
+    <span class="k">"issued_at"</span>:  <span class="s">"2026-03-16T12:00:30Z"</span>,
+    <span class="k">"packet_id"</span>:  <span class="s">"d58f3ea2-9b4g-5f6c-c8d2-0e7g1f5b3c94"</span>,
+    <span class="k">"tp_version"</span>: <span class="s">"1.0"</span>
+  },
+  <span class="k">"signatures"</span>: [{
+    <span class="k">"algorithm"</span>: <span class="s">"ed25519"</span>,
+    <span class="k">"key_id"</span>:    <span class="s">"2026q1-solesupply"</span>,
+    <span class="k">"signature"</span>: <span class="s">"MEUCIQDn9Bz...xR3pLmW"</span>,
+    <span class="k">"signer"</span>:    <span class="s">"solesupply.com"</span>
+  }]
+}</pre>
+        </div>
+
+        <div class="callout scope" style="margin-top: 16px;">
+          <h4 class="gold">Why does the store sign too?</h4>
+          <p>Because now Stripe doesn't have to just trust the store's API call. Stripe can see: the customer authorized $189 (signed by the customer's device), <em>and</em> the store verified that and delegated the charge (signed by the store's key). Two independent signatures. Two layers of accountability.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5 -->
+    <div class="step">
+      <div class="step-rail">
+        <div class="step-num green">5</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-body">
+        <h3>Stripe verifies the entire chain</h3>
+        <div class="who">Stripe (UniKey Verifier)</div>
+        <p>Stripe now has two Trust Packets — yours and SoleSupply's. They verify the full chain in milliseconds:</p>
+
+        <div class="callout security">
+          <h4 class="green">Stripe's verification checklist</h4>
+          <ul>
+            <li>Is the user's signature valid? (look up their public key via DNS)</li>
+            <li>Is SoleSupply's signature valid? (look up their public key via DNS)</li>
+            <li>Does SoleSupply's <code>parent_tph</code> correctly reference the user's packet? (hash must match exactly)</li>
+            <li>Is the scope valid? SoleSupply delegated <code>pay:max_189</code> — that's a subset of the user's <code>pay</code> scope. Good.</li>
+            <li>Are the time windows valid? SoleSupply's 3-min expiry is shorter than the user's 5-min. Good.</li>
+            <li>Has this nonce been used before? (replay check)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 6 -->
+    <div class="step">
+      <div class="step-rail">
+        <div class="step-num green">6</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-body">
+        <h3>Stripe sends confirmation back to your phone</h3>
+        <div class="who">Stripe &rarr; Store &rarr; Your Phone</div>
+        <p>Payment is authorized. Your phone gets a confirmation: <em>"$189.00 paid to SoleSupply — Jordan 4 Retro."</em> The sneakers are on their way.</p>
+        <p>The whole thing took about 2 seconds from the Face ID scan.</p>
+      </div>
+    </div>
+
+    <!-- Step 7 -->
+    <div class="step">
+      <div class="step-rail">
+        <div class="step-num gold">7</div>
+      </div>
+      <div class="step-body">
+        <h3>Every party can independently prove what happened</h3>
+        <div class="who">Auditable by anyone, anytime</div>
+        <p>You, SoleSupply, Stripe, or a bank auditor can take the Trust Packets and independently verify the entire chain. No one needs to call anyone. The cryptography proves it.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <hr class="divider">
+
+  <!-- ════════ THE CHAIN ════════ -->
+  <div class="section-label">The Delegation Chain</div>
+  <h2>How authority flowed and narrowed</h2>
+  <p class="section-desc">Your phone started with full authority. Each handoff could only keep or reduce that authority — never expand it.</p>
+
+  <div class="packet" style="border-color: var(--gold);">
+    <div class="packet-label" style="color: var(--gold);">Your Phone &mdash; Root Authority</div>
+<pre><span class="k">"issuer"</span>:     <span class="s">"your phone (secure enclave)"</span>
+<span class="k">"scope"</span>:      [<span class="s">"pay"</span>]
+<span class="k">"amount"</span>:     <span class="s">"189.00"</span>
+<span class="k">"expires"</span>:    <span class="s">"5 minutes"</span>
+<span class="k">"audience"</span>:   <span class="s">"solesupply.com"</span>
+<span class="k">"parent"</span>:     <span class="c">none — you are the root</span></pre>
+  </div>
+
+  <div class="arrow-down">&#9660; store can only delegate what you gave them</div>
+
+  <div class="packet" style="border-color: var(--blue);">
+    <div class="packet-label" style="color: var(--blue);">SoleSupply &mdash; Verifies your packet, then delegates to Stripe</div>
+<pre><span class="k">"verified"</span>:    <span class="s">"user's signature, audience, amount, time window"</span>
+<span class="k">"delegated_to"</span>: <span class="s">"stripe.com"</span>
+<span class="k">"scope"</span>:        [<span class="s">"pay:max_189"</span>]           <span class="c">// can't exceed your amount</span>
+<span class="k">"expires"</span>:      <span class="s">"3 minutes"</span>              <span class="c">// shorter than yours</span>
+<span class="k">"parent"</span>:       <span class="s">"hash of YOUR packet"</span>    <span class="c">// cryptographic link to you</span>
+<span class="k">"signed_by"</span>:   <span class="s">"solesupply.com"</span>         <span class="c">// store puts their name on it</span></pre>
+  </div>
+
+  <div class="arrow-down">&#9660; Stripe verifies BOTH signatures — yours and the store's — then processes</div>
+
+  <div class="packet" style="border-color: var(--green);">
+    <div class="packet-label" style="color: var(--green);">Stripe &mdash; Verifies full chain, then executes payment</div>
+<pre><span class="k">"chain"</span>:       <span class="s">"your phone &rarr; solesupply &rarr; stripe"</span>
+<span class="k">"verified"</span>:    <span class="s">"both signatures valid, scope valid, not expired, not replayed"</span>
+<span class="k">"action"</span>:      <span class="s">"charge $189.00"</span>
+<span class="k">"result"</span>:      <span class="s">"AUTHORIZED"</span></pre>
+  </div>
+
+  <div class="arrow-down">&#9660; confirmation flows back</div>
+
+  <div class="packet" style="border-color: var(--gold);">
+    <div class="packet-label" style="color: var(--gold);">Your Phone &mdash; Confirmation</div>
+<pre><span class="k">"status"</span>:   <span class="s">"Payment complete"</span>
+<span class="k">"amount"</span>:   <span class="s">"$189.00"</span>
+<span class="k">"merchant"</span>: <span class="s">"SoleSupply"</span>
+<span class="k">"item"</span>:     <span class="s">"Jordan 4 Retro - Size 11"</span></pre>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ════════ WHY ════════ -->
+  <div class="section-label">So What?</div>
+  <h2>Why this is different from how payments work today</h2>
+
+  <div class="compare">
+    <div class="callout why">
+      <h4 class="blue">Today</h4>
+      <ul>
+        <li>You type in a card number — it gets stored on servers everywhere</li>
+        <li>A stolen card number works from anywhere in the world</li>
+        <li>Passwords and OTPs can be phished</li>
+        <li>The store and processor have to "trust" each other via contracts</li>
+        <li>Chargebacks are he-said-she-said</li>
+      </ul>
+    </div>
+    <div class="callout security">
+      <h4 class="green">With UniKey</h4>
+      <ul>
+        <li>No card number ever leaves your phone</li>
+        <li>Fraud requires physically stealing your phone + beating Face ID</li>
+        <li>Nothing to phish — authorization is hardware-bound</li>
+        <li>Trust is cryptographic, not contractual</li>
+        <li>Disputes are provable — the math settles it</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 48px;">
+    <p style="color: var(--dim); font-size: 0.92em; margin-bottom: 8px;">Want to see the code behind the packets?</p>
+    <a href="demo.html" class="cta-link">Try the Interactive Demo &rarr;</a>
+  </div>
+
+</div>
+
+<div class="footer">
+  UniKey Protocol &mdash; RFC 2001 (Trust Packets) &bull; RFC 1200 (Delegation) &bull; RFC 1300 (Device Authority) &bull; RFC 5003 (Auth Flow)
+  <br><a href="demo.html">Interactive Demo</a>
+</div>
+
+</body>
+</html>

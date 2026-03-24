@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniKey — Interactive Demo</title>
+<style>
+  :root {
+    --blue: #0077C8;
+    --green: #00C853;
+    --gold: #FFD600;
+    --bg: #0a0e1a;
+    --card: #111827;
+    --border: #1e293b;
+    --text: #e2e8f0;
+    --dim: #94a3b8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .hero {
+    text-align: center;
+    padding: 48px 40px 40px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero .tag {
+    font-size: 0.75em;
+    letter-spacing: 3px;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .hero h1 {
+    font-size: 2em;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--blue), var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+  }
+  .hero p { color: var(--dim); max-width: 540px; margin: 0 auto; font-size: 0.95em; }
+  .hero .back-link {
+    display: inline-block;
+    margin-top: 14px;
+    color: var(--blue);
+    text-decoration: none;
+    font-size: 0.82em;
+    font-weight: 600;
+  }
+  .hero .back-link:hover { text-decoration: underline; }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 36px 24px; }
+
+  /* Inputs */
+  .demo-inputs {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+  }
+  .input-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .input-row:last-child { margin-bottom: 0; }
+  .input-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .input-group label {
+    font-size: 0.7em;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .input-group input {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 0.88em;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-group input:focus { border-color: var(--blue); }
+
+  /* Tabs */
+  .demo-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 0;
+  }
+  .tab {
+    flex: 1;
+    padding: 12px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    color: var(--dim);
+    font-size: 0.78em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    background: #0d1117;
+    color: var(--green);
+    border-color: var(--green);
+    border-bottom: 1px solid #0d1117;
+  }
+
+  /* Panels */
+  .demo-panel {
+    background: #0d1117;
+    border: 1px solid var(--border);
+    border-radius: 0 0 10px 10px;
+    padding: 24px;
+  }
+  .demo-panel.hidden { display: none; }
+
+  .demo-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .demo-code { overflow-x: auto; }
+  .demo-code pre {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.75em;
+    line-height: 1.6;
+  }
+  .demo-code code { color: var(--text); }
+  .k { color: #7dd3fc; }
+  .s { color: #86efac; }
+  .n { color: #fbbf24; }
+  .c { color: #64748b; font-style: italic; }
+  .kw { color: #c792ea; }
+
+  .code-label {
+    font-size: 0.68em;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .demo-output { overflow-x: hidden; }
+
+  .canonical-output {
+    background: #161b22;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.68em;
+    line-height: 1.5;
+    color: var(--green);
+    word-break: break-all;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .demo-note {
+    font-size: 0.78em;
+    color: var(--dim);
+    margin-top: 10px;
+    padding-left: 12px;
+    border-left: 2px solid var(--border);
+  }
+
+  .tph-display, .sig-display {
+    background: #161b22;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.75em;
+    word-break: break-all;
+  }
+  .tph-display { color: var(--gold); }
+  .sig-display { color: #c792ea; }
+
+  .verify-result {
+    background: #161b22;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 0.82em;
+  }
+  .check-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 0.88em;
+  }
+  .check-icon { font-size: 1.1em; flex-shrink: 0; width: 20px; text-align: center; }
+  .check-icon.pass { color: var(--green); }
+  .check-icon.fail { color: #ef4444; }
+  .check-label { color: var(--dim); }
+  .check-label.fail { color: #ef4444; }
+
+  .chain-viz {
+    background: #161b22;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .chain-node {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+  }
+  .chain-node-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .chain-node-line {
+    width: 1px;
+    height: 16px;
+    background: var(--border);
+    margin-left: 4.5px;
+  }
+  .chain-node-text { font-size: 0.8em; color: var(--dim); }
+  .chain-node-text strong { color: var(--text); }
+
+  .tamper-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .tamper-btn {
+    padding: 7px 14px;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 6px;
+    color: #f87171;
+    font-size: 0.75em;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tamper-btn:hover { background: rgba(239,68,68,0.2); }
+  .tamper-btn.reset {
+    background: rgba(0,200,83,0.1);
+    border-color: rgba(0,200,83,0.3);
+    color: var(--green);
+  }
+  .tamper-btn.reset:hover { background: rgba(0,200,83,0.2); }
+
+  .tamper-result {
+    background: #161b22;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 0.82em;
+    min-height: 40px;
+  }
+  .tamper-result.fail {
+    border-color: rgba(239,68,68,0.4);
+    background: rgba(239,68,68,0.05);
+  }
+  .tamper-result.pass {
+    border-color: rgba(0,200,83,0.3);
+  }
+
+  .footer {
+    text-align: center; padding: 40px;
+    font-size: 0.72em; color: var(--dim);
+    border-top: 1px solid var(--border);
+    margin-top: 48px;
+  }
+  .footer a { color: var(--blue); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 700px) {
+    .hero h1 { font-size: 1.5em; }
+    .demo-split { grid-template-columns: 1fr; }
+    .input-row { flex-direction: column; }
+    .demo-tabs { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="tag">UniKey Protocol</div>
+  <h1>Interactive Demo</h1>
+  <p>Build a Trust Packet, watch it get signed, delegated, and verified — then try to break it.</p>
+  <a href="overview.html" class="back-link">&larr; Back to Overview</a>
+</div>
+
+<div class="container">
+
+  <!-- Purchase inputs -->
+  <div class="demo-inputs">
+    <div class="input-row">
+      <div class="input-group">
+        <label>Item</label>
+        <input type="text" id="inp-item" value="Jordan 4 Retro" />
+      </div>
+      <div class="input-group" style="max-width: 100px;">
+        <label>Size</label>
+        <input type="text" id="inp-size" value="11" />
+      </div>
+      <div class="input-group" style="max-width: 120px;">
+        <label>Price ($)</label>
+        <input type="number" id="inp-price" value="189.00" step="0.01" />
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="input-group">
+        <label>Store</label>
+        <input type="text" id="inp-store" value="solesupply.com" />
+      </div>
+      <div class="input-group">
+        <label>Your email</label>
+        <input type="text" id="inp-email" value="user@icloud.com" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="demo-tabs">
+    <button class="tab active" data-tab="create">1. Create Packet</button>
+    <button class="tab" data-tab="sign">2. Sign (TPH)</button>
+    <button class="tab" data-tab="delegate">3. Store Verifies &amp; Delegates</button>
+    <button class="tab" data-tab="verify">4. Stripe Verifies Chain</button>
+  </div>
+
+  <!-- Tab: Create -->
+  <div class="demo-panel" id="panel-create">
+    <div class="demo-split">
+      <div class="demo-code">
+        <div class="code-label">what your phone does</div>
+<pre><code><span class="c">// 1. Build the packet (minus signatures)</span>
+<span class="kw">const</span> packet = {
+  claims: {
+    audience:  <span class="s">"<span class="live" id="code-store">solesupply.com</span>"</span>,
+    issuer:    <span class="s">"device:iphone-15-pro"</span>,
+    scope:     [<span class="s">"pay"</span>],
+    subject:   <span class="s">"<span class="live" id="code-email">user@icloud.com</span>"</span>
+  },
+  header: {
+    expires_at: <span class="s">"<span class="live" id="code-expires"></span>"</span>,
+    issued_at:  <span class="s">"<span class="live" id="code-issued"></span>"</span>,
+    nonce:      <span class="s">"<span class="live" id="code-nonce"></span>"</span>,
+    packet_id:  <span class="s">"<span class="live" id="code-pid"></span>"</span>,
+    tp_version: <span class="s">"1.0"</span>
+  },
+  payload: {
+    amount:   <span class="s">"<span class="live" id="code-amount">189.00</span>"</span>,
+    currency: <span class="s">"USD"</span>,
+    item:     <span class="s">"<span class="live" id="code-item">Jordan 4 Retro - Size 11</span>"</span>,
+    order_id: <span class="s">"<span class="live" id="code-order"></span>"</span>
+  }
+};
+
+<span class="c">// 2. Canonicalize (RFC-2001, Section 5.3)</span>
+<span class="c">//    - sort all keys alphabetically</span>
+<span class="c">//    - strip whitespace</span>
+<span class="c">//    - UTF-8, no BOM</span>
+<span class="kw">const</span> canonical = canonicalize(packet);</code></pre>
+      </div>
+      <div class="demo-output">
+        <div class="code-label">canonicalized output (what gets hashed)</div>
+        <div class="canonical-output" id="canonical-out"></div>
+        <div class="demo-note">Every key is alphabetically sorted. All whitespace stripped. This is deterministic — any system in the world will produce the exact same string from the same packet.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Sign -->
+  <div class="demo-panel hidden" id="panel-sign">
+    <div class="demo-split">
+      <div class="demo-code">
+        <div class="code-label">hashing &amp; signing</div>
+<pre><code><span class="c">// 3. Hash the canonical form -> TPH</span>
+<span class="kw">const</span> tph = sha256(canonical);
+<span class="c">// "<span class="live" id="code-tph"></span>"</span>
+
+<span class="c">// 4. Sign the TPH with device secure enclave</span>
+<span class="c">//    Private key NEVER leaves the chip</span>
+<span class="kw">const</span> signature = secureEnclave.sign(tph, {
+  algorithm: <span class="s">"ed25519"</span>,
+  key_id:    <span class="s">"2026q1-user"</span>,
+  requireBiometric: <span class="kw">true</span>  <span class="c">// Face ID</span>
+});
+
+<span class="c">// 5. Attach signature to packet</span>
+packet.signatures = [{
+  algorithm: <span class="s">"ed25519"</span>,
+  key_id:    <span class="s">"2026q1-user"</span>,
+  signature: signature,
+  signer:    <span class="s">"<span class="live" id="code-signer">user@icloud.com</span>"</span>
+}];</code></pre>
+      </div>
+      <div class="demo-output">
+        <div class="code-label">trust packet hash (TPH)</div>
+        <div class="tph-display" id="tph-out"></div>
+        <div class="demo-note">This hash is what gets signed. Change any field — even a single character in the item name — and the entire hash changes. Try it above.</div>
+        <div class="code-label" style="margin-top: 20px;">signature</div>
+        <div class="sig-display" id="sig-out"></div>
+        <div class="demo-note">Created by the secure enclave after Face ID. This proves <em>this device</em> approved <em>this exact purchase</em>.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Delegate -->
+  <div class="demo-panel hidden" id="panel-delegate">
+    <div class="demo-split">
+      <div class="demo-code">
+        <div class="code-label">what the store does</div>
+<pre><code><span class="c">// Store receives the Trust Packet</span>
+<span class="c">// Step 1: VERIFY the customer's packet</span>
+<span class="kw">const</span> userKey = dns.lookup(
+  <span class="s">"2026q1-user._domainkey.<span class="live" id="code-user-domain">icloud.com</span>"</span>
+);
+<span class="kw">const</span> isValid = ed25519.verify(
+  userKey, tph, packet.signatures[0]
+);
+<span class="c">// -> <span class="live" id="code-verify-result">true</span></span>
+
+<span class="c">// Step 2: Check audience (is this meant for us?)</span>
+assert(packet.claims.audience === <span class="s">"<span class="live" id="code-aud-check">solesupply.com</span>"</span>);
+
+<span class="c">// Step 3: Check time window</span>
+assert(now &lt;= packet.header.expires_at);
+
+<span class="c">// Step 4: CREATE delegation packet</span>
+<span class="kw">const</span> delegation = {
+  claims: {
+    delegated_to: <span class="s">"stripe.com"</span>,
+    issuer:       <span class="s">"<span class="live" id="code-del-issuer">solesupply.com</span>"</span>,
+    parent_tph:   tph,  <span class="c">// links to user's packet</span>
+    scope:        [<span class="s">"pay:max_<span class="live" id="code-del-max">189</span>"</span>],
+    constraints:  { amount_max: <span class="n"><span class="live" id="code-del-amt">189.00</span></span> }
+  },
+  header: {
+    expires_at: <span class="s">"<span class="live" id="code-del-exp"></span>"</span>,  <span class="c">// shorter!</span>
+    tp_version: <span class="s">"1.0"</span>
+  }
+};
+
+<span class="c">// Step 5: SIGN with store's key</span>
+<span class="kw">const</span> delTph = sha256(canonicalize(delegation));
+delegation.signatures = [{
+  signer: <span class="s">"<span class="live" id="code-del-signer">solesupply.com</span>"</span>,
+  signature: store.sign(delTph)
+}];</code></pre>
+      </div>
+      <div class="demo-output">
+        <div class="code-label">store verification result</div>
+        <div id="store-verify-out" class="verify-result"></div>
+        <div class="code-label" style="margin-top: 20px;">delegation chain so far</div>
+        <div id="chain-visual" class="chain-viz"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab: Verify -->
+  <div class="demo-panel hidden" id="panel-verify">
+    <div class="demo-split">
+      <div class="demo-code">
+        <div class="code-label">what stripe does</div>
+<pre><code><span class="c">// Stripe receives BOTH packets</span>
+<span class="c">// Full chain verification (RFC-2001, Section 6)</span>
+
+<span class="kw">function</span> verifyChain(userPacket, delegation) {
+
+  <span class="c">// 1. Verify user's signature</span>
+  <span class="kw">const</span> userKey = dns.lookupMultiResolver(
+    <span class="s">"2026q1-user._domainkey.icloud.com"</span>,
+    { resolvers: 3, requireConsensus: <span class="kw">true</span> }
+  );  <span class="c">// RFC-3001: 3+ resolvers must agree</span>
+  assert(ed25519.verify(userKey, userTph, userSig));
+
+  <span class="c">// 2. Verify store's signature</span>
+  <span class="kw">const</span> storeKey = dns.lookupMultiResolver(
+    <span class="s">"2026q1._domainkey.<span class="live" id="code-stripe-store">solesupply.com</span>"</span>,
+    { resolvers: 3, requireConsensus: <span class="kw">true</span> }
+  );
+  assert(ed25519.verify(storeKey, delTph, storeSig));
+
+  <span class="c">// 3. Check hash chain</span>
+  assert(delegation.claims.parent_tph === userTph);
+
+  <span class="c">// 4. Check scope narrows (never expands)</span>
+  assert(isSubset(
+    delegation.claims.scope, userPacket.claims.scope
+  ));
+
+  <span class="c">// 5. Check time narrows</span>
+  assert(
+    delegation.header.expires_at &lt;=
+    userPacket.header.expires_at
+  );
+
+  <span class="c">// 6. Replay check</span>
+  assert(!seenBefore(userPacket.header.nonce));
+
+  <span class="kw">return</span> <span class="s">"AUTHORIZED"</span>;
+}</code></pre>
+      </div>
+      <div class="demo-output">
+        <div class="code-label">stripe verification result</div>
+        <div id="stripe-verify-out" class="verify-result"></div>
+        <div class="code-label" style="margin-top: 20px;">complete chain</div>
+        <div id="chain-final" class="chain-viz"></div>
+
+        <!-- Tamper demo -->
+        <div style="margin-top: 8px;">
+          <div class="code-label" style="margin-top: 24px;">try to break it</div>
+          <div class="tamper-buttons">
+            <button class="tamper-btn" id="btn-tamper-amount">Change amount to $500</button>
+            <button class="tamper-btn" id="btn-tamper-expire">Expire the packet</button>
+            <button class="tamper-btn" id="btn-tamper-replay">Replay the nonce</button>
+            <button class="tamper-btn" id="btn-tamper-scope">Escalate scope</button>
+            <button class="tamper-btn reset" id="btn-tamper-reset">Reset</button>
+          </div>
+          <div id="tamper-result" class="tamper-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  UniKey Protocol &mdash; RFC 2001 (Trust Packets) &bull; RFC 1200 (Delegation) &bull; RFC 1300 (Device Authority) &bull; RFC 5003 (Auth Flow)
+  <br><a href="overview.html">Back to Overview</a>
+</div>
+
+<script>
+// ── Helpers ──
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+function isoNow() {
+  return new Date().toISOString().replace(/\.\d+Z/, 'Z');
+}
+function isoPlus(min) {
+  return new Date(Date.now() + min * 60000).toISOString().replace(/\.\d+Z/, 'Z');
+}
+
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function fakeSignature(hash) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+  let sig = '';
+  for (let i = 0; i < 64; i++) {
+    sig += chars[parseInt(hash.substr((i * 2) % 60, 2), 16) % 64];
+  }
+  return sig;
+}
+
+// UniKey-JSON-v1 canonicalization (RFC-2001 Section 5.3)
+function canonicalize(obj) {
+  if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
+  if (Array.isArray(obj)) return '[' + obj.map(canonicalize).join(',') + ']';
+  const keys = Object.keys(obj).sort();
+  return '{' + keys.map(k => JSON.stringify(k) + ':' + canonicalize(obj[k])).join(',') + '}';
+}
+
+// ── State ──
+let nonce = uuid();
+let packetId = uuid();
+let orderId = 'SS-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.floor(Math.random() * 9000 + 1000);
+let tamperState = null;
+
+const $ = id => document.getElementById(id);
+
+// ── Build & render ──
+async function rebuild() {
+  const item = $('inp-item').value;
+  const size = $('inp-size').value;
+  const price = parseFloat($('inp-price').value) || 0;
+  const store = $('inp-store').value;
+  const email = $('inp-email').value;
+  const issuedAt = isoNow();
+  const expiresAt = isoPlus(5);
+  const delExpires = isoPlus(3);
+  const emailDomain = email.includes('@') ? email.split('@')[1] : 'example.com';
+
+  const packet = {
+    claims: {
+      audience: store,
+      issuer: "device:iphone-15-pro",
+      scope: ["pay"],
+      subject: email
+    },
+    header: {
+      expires_at: expiresAt,
+      issued_at: issuedAt,
+      nonce: nonce,
+      packet_id: packetId,
+      tp_version: "1.0"
+    },
+    payload: {
+      amount: price.toFixed(2),
+      currency: "USD",
+      item: item + " - Size " + size,
+      order_id: orderId
+    }
+  };
+
+  const canonical = canonicalize(packet);
+  const tph = await sha256(canonical);
+  const sig = fakeSignature(tph);
+
+  // Create tab
+  $('code-store').textContent = store;
+  $('code-email').textContent = email;
+  $('code-expires').textContent = expiresAt;
+  $('code-issued').textContent = issuedAt;
+  $('code-nonce').textContent = nonce;
+  $('code-pid').textContent = packetId;
+  $('code-amount').textContent = price.toFixed(2);
+  $('code-item').textContent = item + ' - Size ' + size;
+  $('code-order').textContent = orderId;
+  $('canonical-out').textContent = canonical;
+
+  // Sign tab
+  $('code-tph').textContent = tph;
+  $('code-signer').textContent = email;
+  $('tph-out').textContent = 'sha256:' + tph;
+  $('sig-out').textContent = sig;
+
+  // Delegate tab
+  $('code-user-domain').textContent = emailDomain;
+  $('code-aud-check').textContent = store;
+  $('code-del-issuer').textContent = store;
+  $('code-del-max').textContent = Math.floor(price);
+  $('code-del-amt').textContent = price.toFixed(2);
+  $('code-del-exp').textContent = delExpires;
+  $('code-del-signer').textContent = store;
+  $('code-verify-result').textContent = 'true';
+
+  $('store-verify-out').innerHTML = checks([
+    [true, 'User signature valid', 'ed25519 key from ' + emailDomain + ' DNS'],
+    [true, 'Audience matches', 'packet addressed to ' + store],
+    [true, 'Time window valid', 'expires ' + expiresAt],
+    [true, 'Order matches', '$' + price.toFixed(2) + ' — ' + item],
+  ]);
+
+  $('chain-visual').innerHTML = chainViz([
+    ['var(--gold)', email, 'scope: ["pay"] — $' + price.toFixed(2)],
+    ['var(--blue)', store, 'scope: ["pay:max_' + Math.floor(price) + '"] — verified & signed'],
+  ]);
+
+  // Verify tab
+  $('code-stripe-store').textContent = store;
+
+  let checks_data;
+  if (tamperState === 'amount') {
+    checks_data = [
+      [true, 'User signature valid', 'ed25519 key verified'],
+      [true, 'Store signature valid', 'ed25519 key verified'],
+      [true, 'Hash chain valid', 'delegation.parent_tph === user TPH'],
+      [false, 'Scope valid', 'FAIL — $500 exceeds pay:max_' + Math.floor(price)],
+      [false, 'REJECTED', 'TP-004: Delegation Chain Failure'],
+    ];
+  } else if (tamperState === 'expire') {
+    checks_data = [
+      [true, 'User signature valid', 'ed25519 key verified'],
+      [true, 'Store signature valid', 'ed25519 key verified'],
+      [true, 'Hash chain valid', 'delegation.parent_tph === user TPH'],
+      [true, 'Scope valid', 'pay:max_' + Math.floor(price) + ' \u2286 pay'],
+      [false, 'Time window valid', 'FAIL — packet expired 2 minutes ago'],
+      [false, 'REJECTED', 'TP-003: Temporal Validity Failure'],
+    ];
+  } else if (tamperState === 'replay') {
+    checks_data = [
+      [true, 'User signature valid', 'ed25519 key verified'],
+      [true, 'Store signature valid', 'ed25519 key verified'],
+      [true, 'Hash chain valid', 'delegation.parent_tph === user TPH'],
+      [true, 'Scope valid', 'pay:max_' + Math.floor(price) + ' \u2286 pay'],
+      [true, 'Time window valid', 'within bounds'],
+      [false, 'Nonce unique', 'FAIL — nonce already seen in replay store'],
+      [false, 'REJECTED', 'TP-001: Replay Detected'],
+    ];
+  } else if (tamperState === 'scope') {
+    checks_data = [
+      [true, 'User signature valid', 'ed25519 key verified'],
+      [true, 'Store signature valid', 'ed25519 key verified'],
+      [true, 'Hash chain valid', 'delegation.parent_tph === user TPH'],
+      [false, 'Scope valid', 'FAIL — ["pay","admin"] is NOT a subset of ["pay"]'],
+      [false, 'REJECTED', 'TP-004: Delegation Chain Failure — scope escalation blocked'],
+    ];
+  } else {
+    checks_data = [
+      [true, 'User signature valid', 'ed25519 key from ' + emailDomain + ' (3 resolvers agree)'],
+      [true, 'Store signature valid', 'ed25519 key from ' + store + ' (3 resolvers agree)'],
+      [true, 'Hash chain valid', 'delegation.parent_tph === user TPH'],
+      [true, 'Scope valid', 'pay:max_' + Math.floor(price) + ' \u2286 pay'],
+      [true, 'Time window valid', '3 min \u2264 5 min'],
+      [true, 'Nonce unique', 'not in replay store'],
+      [true, 'AUTHORIZED', 'charge $' + price.toFixed(2) + ' to ' + store],
+    ];
+  }
+
+  $('stripe-verify-out').innerHTML = checks(checks_data);
+
+  $('chain-final').innerHTML = chainViz([
+    ['var(--gold)', email, 'ROOT — signed by device secure enclave'],
+    ['var(--blue)', store, 'VERIFIED user, SIGNED delegation'],
+    ['var(--green)', 'stripe.com', tamperState ? 'REJECTED' : 'VERIFIED full chain \u2192 AUTHORIZED'],
+  ]);
+
+  if (tamperState) {
+    const msgs = {
+      amount: 'Stripe rejected the payment. The tampered amount ($500) exceeds the delegated scope (pay:max_' + Math.floor(price) + '). The store only authorized up to $' + price.toFixed(2) + ' \u2014 and you only authorized $' + price.toFixed(2) + '. Nobody can inflate the charge.',
+      expire: 'Stripe rejected the payment. The Trust Packet has expired. Even if an attacker captured a valid packet, it becomes useless after the expiration window (5 minutes for the user, 3 minutes for the delegation).',
+      replay: 'Stripe rejected the payment. This nonce has already been used. Even with a perfectly valid, unexpired packet, it can only be used once. Replaying it at the same store or any other endpoint fails.',
+      scope: 'Stripe rejected the payment. The delegation tried to add "admin" to the scope, but the user only authorized ["pay"]. Scope can only narrow through the chain \u2014 it can never expand. This is enforced mathematically, not by policy.'
+    };
+    $('tamper-result').innerHTML = '<span style="color: #ef4444; font-weight: 600;">REJECTED</span> \u2014 ' + msgs[tamperState];
+    $('tamper-result').className = 'tamper-result fail';
+  } else {
+    $('tamper-result').innerHTML = '<span style="color: var(--green); font-weight: 600;">ALL CHECKS PASS</span> \u2014 Click a button above to simulate an attack and see how it gets caught.';
+    $('tamper-result').className = 'tamper-result pass';
+  }
+}
+
+function checks(list) {
+  return list.map(([pass, label, detail]) =>
+    '<div class="check-line">' +
+      '<span class="check-icon ' + (pass ? 'pass' : 'fail') + '">' + (pass ? '\u2713' : '\u2717') + '</span>' +
+      '<span class="check-label ' + (pass ? '' : 'fail') + '"><strong>' + label + '</strong> \u2014 ' + detail + '</span>' +
+    '</div>'
+  ).join('');
+}
+
+function chainViz(nodes) {
+  return nodes.map(([color, name, desc], i) =>
+    (i > 0 ? '<div class="chain-node-line"></div>' : '') +
+    '<div class="chain-node">' +
+      '<div class="chain-node-dot" style="background: ' + color + ';"></div>' +
+      '<div class="chain-node-text"><strong>' + name + '</strong> \u2014 ' + desc + '</div>' +
+    '</div>'
+  ).join('');
+}
+
+// ── Tabs ──
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.demo-panel').forEach(p => p.classList.add('hidden'));
+    tab.classList.add('active');
+    $('panel-' + tab.dataset.tab).classList.remove('hidden');
+  });
+});
+
+// ── Inputs ──
+document.querySelectorAll('.demo-inputs input').forEach(input => {
+  input.addEventListener('input', () => {
+    tamperState = null;
+    rebuild();
+  });
+});
+
+// ── Tamper buttons ──
+$('btn-tamper-amount').addEventListener('click', () => { tamperState = 'amount'; rebuild(); });
+$('btn-tamper-expire').addEventListener('click', () => { tamperState = 'expire'; rebuild(); });
+$('btn-tamper-replay').addEventListener('click', () => { tamperState = 'replay'; rebuild(); });
+$('btn-tamper-scope').addEventListener('click', () => { tamperState = 'scope'; rebuild(); });
+$('btn-tamper-reset').addEventListener('click', () => {
+  tamperState = null;
+  nonce = uuid();
+  packetId = uuid();
+  rebuild();
+});
+
+// ── Init ──
+rebuild();
+</script>
+</body>
+</html>
