@@ -2,7 +2,7 @@
 
 The normative standards defining the global trust fabric for Agentic Commerce.
 
-UniKey is a decentralized cryptographic trust layer that enables AI agents, hardware devices, and payment networks to verify identity, authority, and intent at internet scale — without centralized intermediaries.
+UniKey is a decentralized cryptographic trust layer that enables enterprise applications, service APIs and HTTP traffic, AI agents, hardware devices, and payment networks to verify identity, authority, and intent at internet scale — without centralized intermediaries.
 
 For the full architecture overview, see [RFC 1000](rfc-1000.md).
 
@@ -17,10 +17,12 @@ For the full architecture overview, see [RFC 1000](rfc-1000.md).
 | [1400](rfc-1400.md) | **Authorization Certificate** | Draft |
 | [2001](rfc-2001.md) | Trust Packet Format | Draft |
 | [2002](rfc-2002.md) | **Authorization Ledger** | Draft |
+| [2003](rfc-2003.md) | Scope Grammar & Registry | Draft |
 | [3001](rfc-3001.md) | Verifier DNS Hardening Algorithm | Draft |
 | [3002](rfc-3002.md) | DKIM / DNS Key Discovery & Validation Profile | Draft |
 | [4001](rfc-4001.md) | Operational Compliance Checklist | Stable |
 | [5003](rfc-5003.md) | Authorization Flow & Verification Architecture | Draft |
+| [5004](rfc-5004.md) | SMTP / Email Transport Profile | Draft |
 
 ## Series Overview
 
@@ -33,6 +35,6 @@ For the full architecture overview, see [RFC 1000](rfc-1000.md).
 | 5000 | Operational Guidance |
 | 9000 | Informational |
 
-For more details on the numbering strategy and RFC template, see [rfc-overview.md](rfc-overview.md).
+For more details on the numbering strategy, see [RFC 1000](rfc-1000.md).
 
 https://swoopnow.com/#RFC
